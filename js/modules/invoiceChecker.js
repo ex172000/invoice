@@ -272,9 +272,9 @@ export function parseTaxInvoice(text, filename) {
 export function compareRecords(taxRecord, finRecord) {
     const mismatches = [];
 
-    // Compare sales order
-    if (normalizeSalesOrder(taxRecord.sales_order) !== normalizeSalesOrder(finRecord.sales_order)) {
-        mismatches.push(MISMATCH_FIELDS.SALES_ORDER);
+    // Compare customer code
+    if (normalizeSalesOrder(taxRecord.customer_code) !== normalizeSalesOrder(finRecord.customer_code)) {
+        mismatches.push(MISMATCH_FIELDS.CUSTOMER_CODE);
     }
 
     // Compare customer name (only if both are present)
@@ -284,19 +284,9 @@ export function compareRecords(taxRecord, finRecord) {
         mismatches.push(MISMATCH_FIELDS.CUSTOMER_NAME);
     }
 
-    // Compare customer code
-    if (normalizeSalesOrder(taxRecord.customer_code) !== normalizeSalesOrder(finRecord.customer_code)) {
-        mismatches.push(MISMATCH_FIELDS.CUSTOMER_CODE);
-    }
-
     // Compare invoice date
     if (parseDateAny(taxRecord.invoice_date) !== parseDateAny(finRecord.invoice_date)) {
         mismatches.push(MISMATCH_FIELDS.INVOICE_DATE);
-    }
-
-    // Compare due date
-    if (parseDateAny(taxRecord.due_date) !== parseDateAny(finRecord.due_date)) {
-        mismatches.push(MISMATCH_FIELDS.DUE_DATE);
     }
 
     // Compare currency
@@ -304,7 +294,7 @@ export function compareRecords(taxRecord, finRecord) {
         mismatches.push(MISMATCH_FIELDS.CURRENCY);
     }
 
-    // Compare total amount (with tolerance)
+    // Compare total amount (with tolerance of 0.5)
     const taxAmt = taxRecord.total_amount;
     const finAmt = finRecord.total_amount;
 
