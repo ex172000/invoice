@@ -112,6 +112,7 @@ export const CSV_HEADERS = [
     'check_status',
     'mismatch_fields',
     'source_file',
+    'mismatch_reason',
 ];
 
 // Check status values

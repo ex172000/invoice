@@ -314,6 +314,42 @@ export function compareRecords(taxRecord, finRecord) {
 }
 
 /**
+ * Generate human-readable mismatch reason
+ * @param {string} mismatches - Comma-separated mismatch fields
+ * @param {Object} taxRecord - Tax invoice record
+ * @param {Object} finRecord - Finance invoice record
+ * @returns {string} Human-readable mismatch reason
+ */
+function generateMismatchReason(mismatches, taxRecord, finRecord) {
+    if (!mismatches) return '';
+
+    const reasons = [];
+    const fields = mismatches.split(',');
+
+    for (const field of fields) {
+        switch (field.trim()) {
+            case MISMATCH_FIELDS.CUSTOMER_CODE:
+                reasons.push(`Customer code mismatch: Tax=${taxRecord.customer_code}, Finance=${finRecord.customer_code}`);
+                break;
+            case MISMATCH_FIELDS.CUSTOMER_NAME:
+                reasons.push(`Customer name mismatch: Tax=${taxRecord.customer_name}, Finance=${finRecord.customer_name}`);
+                break;
+            case MISMATCH_FIELDS.INVOICE_DATE:
+                reasons.push(`Invoice date mismatch: Tax=${taxRecord.invoice_date}, Finance=${finRecord.invoice_date}`);
+                break;
+            case MISMATCH_FIELDS.CURRENCY:
+                reasons.push(`Currency mismatch: Tax=${taxRecord.currency}, Finance=${finRecord.currency}`);
+                break;
+            case MISMATCH_FIELDS.TOTAL_AMOUNT:
+                reasons.push(`Amount mismatch: Tax=${formatAmount(taxRecord.total_amount)} ${taxRecord.currency}, Finance=${formatAmount(finRecord.total_amount)} ${finRecord.currency}`);
+                break;
+        }
+    }
+
+    return reasons.join('; ');
+}
+
+/**
  * Cross-check tax invoices against finance invoices
  * @param {Array} taxInvoices - Array of {file, text, renamedFile}
  * @param {Array<string>} financePages - Finance invoice page texts
@@ -364,6 +400,11 @@ export function crossCheckInvoices(taxInvoices, financePages) {
             amountDiff = finAmount - taxAmount;
         }
 
+        // Generate human-readable mismatch reason
+        const mismatchReason = finRecord && status === CHECK_STATUS.MISMATCH
+            ? generateMismatchReason(mismatches, taxRecord, finRecord)
+            : '';
+
         results.push({
             sales_order_number: taxRecord.sales_order || '',
             customer_code: taxRecord.customer_code || '',
@@ -378,6 +419,7 @@ export function crossCheckInvoices(taxInvoices, financePages) {
             check_status: status,
             mismatch_fields: mismatches,
             source_file: filename,
+            mismatch_reason: mismatchReason,
         });
     }
 
@@ -399,6 +441,7 @@ export function crossCheckInvoices(taxInvoices, financePages) {
             check_status: CHECK_STATUS.FINANCE_ONLY,
             mismatch_fields: MISMATCH_FIELDS.TAX_INVOICE_MISSING,
             source_file: '',
+            mismatch_reason: 'No matching tax invoice found',
         });
     }
 
