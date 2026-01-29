@@ -54,7 +54,7 @@ function normalizeText(text) {
 async function main() {
     console.log('=== Testing Tax Invoice Parsing with Updated CONFIG.TAX_INVOICE Patterns ===\n');
 
-    const testFile = 'test_data/Fatura FT OM.2026_1 Original.pdf';
+    const testFile = '/Users/qichao/invoice/test_data/Fatura FT OM.2026_1 Original.pdf';
     console.log(`Test file: ${testFile}\n`);
 
     const data = new Uint8Array(fs.readFileSync(testFile));

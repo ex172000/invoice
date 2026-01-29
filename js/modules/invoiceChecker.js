@@ -186,9 +186,10 @@ export function parseTaxInvoice(text, filename) {
         }
     }
 
-    // Extract invoice date (find "Date" label, next line is date)
+    // Extract invoice date (find "Date" or "Data" label, next line is date)
     for (let i = 0; i < lines.length; i++) {
-        if (lines[i].trim() === 'Date') {
+        const trimmed = lines[i].trim();
+        if (trimmed === 'Date' || trimmed === 'Data') {
             if (i + 1 < lines.length) {
                 const dateMatch = lines[i + 1].match(/\d{4}-\d{2}-\d{2}/);
                 if (dateMatch) {
@@ -199,9 +200,9 @@ export function parseTaxInvoice(text, filename) {
         }
     }
 
-    // Extract due date (find line containing "Due Date", then find next date in following lines)
+    // Extract due date (find line containing "Due Date" or "Vencimento", then find next date in following lines)
     for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes('Due Date')) {
+        if (lines[i].includes('Due Date') || lines[i].includes('Vencimento')) {
             // Search next few lines for a date
             for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
                 const dateMatch = lines[j].match(/\d{4}-\d{2}-\d{2}/);
@@ -211,6 +212,20 @@ export function parseTaxInvoice(text, filename) {
                 }
             }
             break;
+        }
+    }
+
+    // Extract currency (find line with just "USD" or "EUR" before "Currency" or "Moeda" label)
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes('Currency') || lines[i].includes('Moeda')) {
+            // Check previous line for currency code
+            if (i > 0) {
+                const prevLine = lines[i - 1].trim();
+                if (prevLine === 'USD' || prevLine === 'EUR') {
+                    result.currency = prevLine;
+                    break;
+                }
+            }
         }
     }
 
@@ -262,8 +277,10 @@ export function compareRecords(taxRecord, finRecord) {
         mismatches.push(MISMATCH_FIELDS.SALES_ORDER);
     }
 
-    // Compare customer name
-    if (normalizeName(taxRecord.customer_name) !== normalizeName(finRecord.customer_name)) {
+    // Compare customer name (only if both are present)
+    const taxName = normalizeName(taxRecord.customer_name);
+    const finName = normalizeName(finRecord.customer_name);
+    if (taxName && finName && taxName !== finName) {
         mismatches.push(MISMATCH_FIELDS.CUSTOMER_NAME);
     }
 
