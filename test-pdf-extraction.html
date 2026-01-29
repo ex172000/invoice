@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test PDF Extraction</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <h1>PDF.js Text Extraction Test</h1>
+    <input type="file" id="fileInput" accept=".pdf">
+    <pre id="output"></pre>
+
+    <script type="module">
+        // Configure PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Import the extraction function
+        import { extractText, textToLines } from './js/modules/pdfExtractor.js';
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const result = await extractText(file);
+                const lines = textToLines(result.text);
+
+                let output = `=== PDF.js Extraction ===\n`;
+                output += `Total lines: ${lines.length}\n\n`;
+                output += `First 20 lines:\n`;
+                for (let i = 0; i < Math.min(20, lines.length); i++) {
+                    output += `${i}: '${lines[i]}'\n`;
+                }
+
+                // Find "Dear" line
+                output += `\n=== Looking for "Dear Sir" ===\n`;
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].includes("Dear Sir") || lines[i].includes("Dear Madam")) {
+                        output += `Line ${i-1}: '${lines[i-1] || 'N/A'}'\n`;
+                        output += `Line ${i} (Dear): '${lines[i]}'\n`;
+                        output += `Line ${i+1}: '${lines[i+1] || 'N/A'}'\n`;
+                        break;
+                    }
+                }
+
+                document.getElementById('output').textContent = output;
+            } catch (error) {
+                document.getElementById('output').textContent = `Error: ${error.message}`;
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

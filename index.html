@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Processor</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Invoice Processor</h1>
+            <p class="subtitle">Process invoice PDFs with automatic renaming and cross-checking</p>
+        </header>
+
+        <main class="main-content">
+            <!-- File Upload Section -->
+            <section class="upload-section">
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <h2>Drop Invoice PDFs Here</h2>
+                        <p>or click to browse files</p>
+                        <p class="file-hint">Upload multiple invoices + Finance invoice.pdf</p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                </div>
+
+                <div id="fileList" class="file-list hidden">
+                    <div class="file-list-header">
+                        <h3>Uploaded Files (<span id="fileCount">0</span>)</h3>
+                        <button id="clearAllBtn" class="btn-secondary">Clear All</button>
+                    </div>
+                    <div id="fileItems" class="file-items"></div>
+                </div>
+            </section>
+
+            <!-- Process Button -->
+            <div id="processSection" class="process-section hidden">
+                <button id="processBtn" class="btn-primary btn-large">Process Invoices</button>
+            </div>
+
+            <!-- Progress Section -->
+            <section id="progressSection" class="progress-section hidden">
+                <h3>Processing Status</h3>
+                <div class="progress-steps">
+                    <div id="step1" class="progress-step pending">
+                        <span class="step-icon">⏳</span>
+                        <span class="step-text">Extracting text from PDFs</span>
+                        <span class="step-counter"></span>
+                    </div>
+                    <div id="step2" class="progress-step pending">
+                        <span class="step-icon">⏳</span>
+                        <span class="step-text">Renaming invoices</span>
+                        <span class="step-counter"></span>
+                    </div>
+                    <div id="step3" class="progress-step pending">
+                        <span class="step-icon">⏳</span>
+                        <span class="step-text">Cross-checking with Finance invoice</span>
+                        <span class="step-counter"></span>
+                    </div>
+                    <div id="step4" class="progress-step pending">
+                        <span class="step-icon">⏳</span>
+                        <span class="step-text">Generating CSV report</span>
+                        <span class="step-counter"></span>
+                    </div>
+                    <div id="step5" class="progress-step pending">
+                        <span class="step-icon">⏳</span>
+                        <span class="step-text">Creating ZIP archive</span>
+                        <span class="step-counter"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <h3>Results Summary</h3>
+                <div class="results-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Renamed:</span>
+                        <span id="statRenamed" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item stat-success">
+                        <span class="stat-label">OK:</span>
+                        <span id="statOK" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item stat-warning">
+                        <span class="stat-label">MISMATCH:</span>
+                        <span id="statMismatch" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item stat-warning">
+                        <span class="stat-label">Not Found:</span>
+                        <span id="statNotFound" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item stat-error">
+                        <span class="stat-label">Errors:</span>
+                        <span id="statErrors" class="stat-value">0</span>
+                    </div>
+                </div>
+                <div id="errorDetails" class="error-details hidden"></div>
+                <button id="downloadBtn" class="btn-primary btn-large">Download Results.zip</button>
+                <button id="resetBtn" class="btn-secondary">Process More Files</button>
+            </section>
+
+            <!-- Error Section -->
+            <section id="errorSection" class="error-section hidden">
+                <div class="error-message">
+                    <h3>Error</h3>
+                    <p id="errorText"></p>
+                </div>
+                <button id="retryBtn" class="btn-primary">Try Again</button>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>All processing happens in your browser. Files never leave your machine.</p>
+            <p><a href="https://github.com" target="_blank">View on GitHub</a> | <a href="#" id="aboutLink">About</a></p>
+        </footer>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2>About Invoice Processor</h2>
+            <p>This tool processes invoice PDFs by:</p>
+            <ul>
+                <li>Extracting metadata (date, customer, order number) from invoices</li>
+                <li>Renaming them to a standard format: <code>dd.mm_Customer_Order_Code.pdf</code></li>
+                <li>Cross-checking tax invoices against Finance invoice</li>
+                <li>Generating a CSV report with comparison results</li>
+            </ul>
+            <h3>Privacy</h3>
+            <p>All processing happens entirely in your browser using JavaScript. No files are uploaded to any server. Your data never leaves your machine.</p>
+            <h3>Technologies</h3>
+            <p>Built with PDF.js (text extraction) and JSZip (archive creation). Pure client-side JavaScript, no backend required.</p>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
