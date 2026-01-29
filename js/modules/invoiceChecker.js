@@ -272,16 +272,9 @@ export function parseTaxInvoice(text, filename) {
 export function compareRecords(taxRecord, finRecord) {
     const mismatches = [];
 
-    // Compare customer code
+    // Compare customer code (if customer code matches, customer is considered matched)
     if (normalizeSalesOrder(taxRecord.customer_code) !== normalizeSalesOrder(finRecord.customer_code)) {
         mismatches.push(MISMATCH_FIELDS.CUSTOMER_CODE);
-    }
-
-    // Compare customer name (only if both are present)
-    const taxName = normalizeName(taxRecord.customer_name);
-    const finName = normalizeName(finRecord.customer_name);
-    if (taxName && finName && taxName !== finName) {
-        mismatches.push(MISMATCH_FIELDS.CUSTOMER_NAME);
     }
 
     // Compare invoice date
